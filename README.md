@@ -1,2 +1,99 @@
 # FasterRCNN-TBX11K-Localization
 This repo holds the implementation of FasterRCNN deep learning architecture trained on TBX11L Chest X-rays Dataset for Localization.
+
+# Todo
+- [x] Download and process the dataset.
+- [x] Design the FasterRCNN Architecture.
+- [x] Build the dataflow pipeline.
+- [x] 3% dataset trail run to ensure proper pipeline design as proof-of-work.
+- [ ] Create an sbatch file to submit job to ASU's Sol supercomupter.
+- [ ] Run on ASU's Sol supercomputer to obtain final results.
+- [ ] Visualize Results.
+
+## Chest X-ray Dataset: TBX11K
+
+### Abstract
+This research focuses on advancing Tuberculosis (TB) diagnosis through the application of deep learning techniques. The study addresses the challenges faced in TB diagnosis, particularly the time-consuming nature of traditional diagnostic methods. Leveraging the power of deep learning, this research aims to significantly reduce the diagnosis time and improve accuracy.
+
+### Background
+Tuberculosis, caused by the bacterium Mycobacterium tuberculosis, is a prevalent infectious disease globally. Timely and accurate diagnosis is crucial for effective treatment and prevention of its spread. Traditional TB diagnosis methods are laborious and time-intensive, often leading to delays in initiating treatment. The advent of deep learning offers a promising avenue for expedited and precise TB diagnosis.
+
+### Dataset Description
+- Research Focus: Medical image analysis using deep learning techniques.
+- Specific Area: Classification and detection of anomalies in medical images.
+- Proposed Methodology: Symmetric Abnormity Search (SAS) technique for feature extraction.
+- Objective: Enhancing accuracy in identifying subtle and complex abnormalities.
+- Dataset: Curated dataset with diverse medical images, ensuring representation of various conditions and demographics.
+
+
+
+
+# Deep Learning Model: FasterRCNN
+
+The presented research delves into the innovative integration of Region Proposal Network (RPN) with Fast R-CNN for object detection, exploring its core principles, architectural intricacies, training methodologies, and evaluation techniques in this comprehensive study.
+
+## Issues FasterRCNN Solutions
+1. Efficient Region Proposal Generation: RPN efficiently generates region proposals without relying on external methods like selective search or edge boxes, leading to faster and more accurate object localization.
+2. Shared Convolutional Features: By sharing convolutional features between RPN and Fast R-CNN, the model optimizes computational resources and reduces redundancy, enhancing both speed and accuracy.
+3. Unified Training Framework: The model learns a unified network with shared features, eliminating the need for separate training of proposal methods and detection networks. This integration streamlines the training process.
+4. Accurate Object Localization: RPN's regression output refines anchor boxes, enhancing object localization accuracy. This ensures precise bounding box predictions around detected objects.
+5. End-to-End Training: The model can be trained end-to-end, allowing joint optimization of region proposal generation and object detection, leading to improved overall performance.
+6. Reduced False Alarms: The model's proposals undergo non-maximum suppression (NMS), reducing redundant proposals and false alarms while maintaining high recall, enhancing the quality of selected regions.
+7. Flexibility in Anchor Design: The model accommodates varying scales and aspect ratios for anchor boxes, ensuring adaptability to diverse object sizes and shapes commonly encountered in real-world scenarios.
+8. Insensitivity to Hyperparameters: The model demonstrates robustness to hyperparameter choices, such as the balancing parameter (λ), making it versatile and easier to fine-tune for different applications.
+
+## Architecure of FasterRCNN
+The Faster R-CNN architecture comprises three main components: the **Region Proposal Network (RPN)**, **shared convolutional layers**, and the **Fast R-CNN detector**. Here's a detailed overview of each component:
+
+### Region Proposal Network (RPN)
+The RPN is responsible for generating region proposals within the input image. It achieves this by sliding a small network (typically a few convolutional layers) over the convolutional feature map produced by the shared layers. The RPN predicts regions that potentially contain objects and their corresponding objectness scores. These predicted regions are referred to as anchors.
+
+### Shared Convolutional Layers
+A set of convolutional layers (usually a pre-trained deep neural network like VGG or ResNet) form the shared backbone of the Faster R-CNN model. These layers extract hierarchical features from the input image. The feature map produced by these layers is used both by the RPN for generating proposals and by the subsequent Fast R-CNN detector for object classification and bounding box regression.
+
+### Fast R-CNN Detector
+The Fast R-CNN detector utilizes the proposals generated by the RPN. It refines these proposals and performs object classification and bounding box regression. This component consists of two sibling fully connected layers: one for object classification (identifying the object class) and the other for bounding box regression (refining the coordinates of the bounding box). The class scores and refined bounding box coordinates are computed for each proposed region.
+
+
+## Training Process
+
+### Region Proposal Network (RPN) Training
+- **Initialization:** The RPN is initialized with a pre-trained ImageNet model.
+- **Objective:** The RPN's objective is to generate region proposals. It minimizes a loss function that includes both classification and regression terms.
+- **Classification Loss:** Utilizes a log loss over two classes (object vs. not object) for each anchor. Positive and negative anchors are determined based on their Intersection over Union (IoU) with ground-truth objects.
+- **Regression Loss: **Utilizes a robust loss function (smooth L1) to regress the bounding box coordinates.
+- **Training Data:** Positive and negative anchor labels are assigned based on IoU thresholds with ground-truth objects.
+- **Normalization:** The loss terms are normalized by the mini-batch size (Ncls) and the number of anchor locations (Nreg). They are also weighted by a balancing parameter (λ) to balance the influence of classification and regression terms.
+- **Optimization:** The RPN is optimized using stochastic gradient descent (SGD) with backpropagation. The shared convolutional layers' weights are updated during this step.
+### Fast R-CNN Detector Training
+- **Initialization:** The Fast R-CNN detector is initialized with the same pre-trained ImageNet model used for the RPN.
+- **Objective:** The Fast R-CNN's objective is to classify the proposed regions and refine their bounding box coordinates.
+Classification Loss: Uses a softmax loss to classify objects into different classes.
+- **Regression Loss:** Utilizes a robust loss function (smooth L1) to further refine the bounding box coordinates.
+- **Training Data:** Positive proposals from the RPN are assigned ground-truth object labels for classification and regression targets.
+- **Optimization:** The Fast R-CNN detector is optimized using SGD with backpropagation. The shared convolutional layers' weights are fine-tuned during this step.
+
+
+## Hyperparameter Tuning
+
+To optimize FasterRCNN's performance, consider these hyperparameters:
+
+- Learning Rate: Adjust the learning rate to control the step size during optimization.
+- Batch Size: Determine the number of samples in each mini-batch for gradient updates.
+- Number of ATUs: Experiment with different numbers of ATUs to find the optimal architecture complexity.
+- Adaptive Cardinality: Tune the adaptive cardinality to balance model complexity and accuracy.
+- Regularization: Apply techniques like dropout or L2 regularization to prevent overfitting.
+
+## Testing Process
+
+1. **Data Preparation:** Prepare the test dataset in the same manner as the training dataset.
+2. **Model Loading:** Load the trained FasterRCNN model weights.
+3. **Inference:** Perform inference on the test data using the loaded model.
+4. **Evaluation:** Evaluate the model's performance using appropriate metrics (e.g., accuracy, precision, recall) based on the task.
+5. **Result Analysis:** Analyze the results to gain insights into the model's strengths and areas for improvement.
+
+# References
+
+1. Ren, Shaoqing, et al. "Faster r-cnn: Towards real-time object detection with region proposal networks." Advances in neural information processing systems 28 (2015).
+2. Liu, Y., Wu, Y.-H., Ban, Y., Wang, H., & Cheng, M.-M. (2020). Rethinking computer-aided tuberculosis diagnosis. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (pp. 2646-2655).
+3. Liu, Y., Wu, Y.-H., Zhang, S.-C., Liu, L., Wu, M., & Cheng, M.-M. (2023). Revisiting computer-aided tuberculosis diagnosis. IEEE Transactions on Pattern Analysis and Machine Intelligence.
